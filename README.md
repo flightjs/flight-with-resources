@@ -12,7 +12,7 @@ bower install --save flight-with-resources
 
 ## Example
 
-Here's an example of two component definitions that use `withResources`.
+Here's an example of two component definitions that use `withResources` to share `appManifest` data.
 
 ```js
 function providingComponent() {
@@ -32,20 +32,63 @@ function requestingComponent() {
 }
 ```
 
-
 ## API
 
 ### `provideResource`
 
-`provideResources`, takes the name of the resource that is being provided, and then the resource itself. The resource can be any JavaScript type, including a function.
+`provideResource`, takes as string that uniquely identifies the resource being provided, and then either the resource itself or a 'provider function' that, when called, returns the resource:
+
+```js
+this.provideResource('version', '1.2.3');
+
+this.provideResource('config', {
+    ponies: true,
+    kittens: false
+});
+
+this.provideResource('kitten', function () {
+    return {
+        name: 'Fluffy',
+        coat: 'Ginger',
+        disposition: 'Misunderstood'
+    };
+});
+```
+
+When a resource is requested, the request may also pass configuration data which will be passed to the providing function:
+
+```js
+this.provideResource('custom-kitten', function (config) {
+    return {
+        name: config.name || 'Fluffy',
+        coat: config.coat || 'Ginger',
+        disposition: config.disposition || 'Misunderstood'
+    };
+});
+
+this.requestResource('custom-kitten', {
+    name: 'Jasper',
+    coat: 'Black'
+});
+```
+
+There can only be one resource for any given name, and first-registration wins.
 
 ### `requestResource`
 
-`requestResource` takes the name of the resource being requested and returns the requested resource.
+`requestResource` takes the name of the resource to be requested and (optional) configuration data to be passed to the providing function, and returns the requested resource.
+
+If the resource has not been registered, `requestResource` will throw.
+
+var fluffyKitten = this.requestResource('kitten');
+var fluffyKitten = this.requestResource('custom-kitten', {
+    name: 'Tibbles',
+    coat: 'Tortoiseshell'
+});
 
 ### `removeResource`
 
-`removeResource` takes the name of a resource to be removed.
+`removeResource` takes the name of a resource to be removed and unregisters it so that futher requests will throw.
 
 
 ## Development

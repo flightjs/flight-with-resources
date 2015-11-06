@@ -3,7 +3,7 @@ var baseConfig = require('./webpack.config');
 
 module.exports = Object.assign(baseConfig, {
     output: {
-        library: 'flight-with-resources',
+        library: 'withResources',
         filename: 'flight-with-resources.js',
         libraryTarget: 'umd',
         path: constants.BUILD_DIRECTORY
